@@ -1,27 +1,31 @@
-export const defaultOutputDir = '_results_';
+export const SCREENSHOT_PADDING_WITH = 4
+export const FRAME_REGEX = new RegExp(`^.*\\/(\\d{${SCREENSHOT_PADDING_WITH}})\\.png`)
+export const SUPPORTED_VIDEO_FORMATS = {
+  mp4: {
+    fileExtension: 'mp4',
+    contentType: 'video/mp4',
+    vcodec: 'libx264',
+  },
+  webm: {
+    fileExtension: 'webm',
+    contentType: 'video/webm',
+    vcodec: 'libvpx-vp9',
+  },
+  default: {
+    fileExtension: 'mp4',
+    contentType: 'video/mp4',
+    vcodec: 'libx264',
+  }
+} as const
 
-export default {
-  debugMode: false,
-
-  logLevel: 'info',
-
-  videoRenderTimeout: 5,
-
-  outputDir: defaultOutputDir,
-  allureOutputDir: 'allure-results',
-
-  // How many digits to zero-pad the screenshot file names by
-  // - 0001.png for the second frame by default
-  screenshotPaddingWidth: 4,
+export const DEFAULT_OPTIONS = {
+  videoRenderTimeout: 5000,
 
   // Where to save screenshots
-  rawPath: 'rawSeleniumVideoGrabs',
+  rawPath: '.video-reporter-screenshots',
 
-  // Should an allure report be updated with videos
-  // There is a bug, or just bad design really, where
-  // Allure is needed to make sure the videos have
-  // time to be saved before the process exits
-  usingAllure: false,
+  // Prefix for video filenames by either suite or test name
+  filenamePrefixSource: 'test',
 
   // Should all videos be saved, or only from failed tests
   saveAllVideos: false,
@@ -38,23 +42,18 @@ export default {
   // videoFormat to be used for generated videos. One of 'mp4', 'webm'
   videoFormat: 'webm',
 
-  //
-  // JSON Wire protocol
-  //
-
   // Which commands should be excluded from screenshots
-  excludedActions: [
-
-  ],
+  excludedActions: [],
 
   // Which commands should result in a screenshot (without `/session/:sessionId/`)
   // https://github.com/SeleniumHQ/selenium/wiki/JsonWireProtocol
-  jsonWireActions: [
+  snapshotCommands: [
     'url',
     'forward',
     'back',
     'refresh',
     'execute',
+    'sync',
     'size',
     'position',
     'maximize',
@@ -82,11 +81,25 @@ export default {
     'longclick',
     'flick',
     'location',
+    'actions'
   ],
 
   // If test speed is not an issue, this option can be enabled to do a screenshot on every json wire message
   recordAllActions: false,
 
+  // Should only the last failure be recorded
+  onlyRecordLastFailure: false,
+
   // Add a screenshot at a regular interval
-  screenshotIntervalSecs: undefined,
-};
+  screenshotIntervalSecs: 0,
+} as const
+
+export const TO_LOCAL_STRING_OPTIONS = {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hour12: false,
+} as const
