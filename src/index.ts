@@ -187,7 +187,7 @@ export default class VideoReporter extends WdioReporter {
   /**
    * Cleare suite name from naming structure
    */
-  onSuiteEnd (suite: SuiteStats) {
+  async onSuiteEnd (suite: SuiteStats) {
     if (!this.#record) {
       return
     }
@@ -203,17 +203,18 @@ export default class VideoReporter extends WdioReporter {
     const allTestsPassed = suite.tests.filter(test => test.state === 'failed').length === 0
 
     if (hasFailedTests || (allTestsPassed && this.options.saveAllVideos)) {
-      this.addFrame()
+      await this.addFrame(true)
     }
   }
 
   /**
    * Setup filename based on test name and prepare storage directory
    */
-  onTestStart (suite: TestStats) {
+  async onTestStart (suite: TestStats) {
     if (!this.#record) {
       return
     }
+    await this.addFrame(true)
 
     if (!this.isCucumberFramework && this.options.filenamePrefixSource === 'test') {
       this.testNameStructure.push(suite.title.replace(/ /g, '-').replace(/-{2,}/g, '-'))
@@ -242,7 +243,7 @@ export default class VideoReporter extends WdioReporter {
   /**
    * Add attachment to Allure if applicable and start to generate the video (Not applicable to Cucumber)
    */
-  onTestEnd (test: TestStats) {
+  async onTestEnd (test: TestStats) {
     if (!this.#record) {
       return
     }
@@ -254,7 +255,7 @@ export default class VideoReporter extends WdioReporter {
     this.#extendAllureReport()
 
     if (test.state === 'failed' || (test.state === 'passed' && this.options.saveAllVideos)) {
-      this.addFrame()
+      await this.addFrame(true)
       this.generateVideo()
     }
   }
@@ -325,7 +326,7 @@ export default class VideoReporter extends WdioReporter {
       })
   }
 
-  addFrame () {
+  async addFrame (immediateCapture:boolean = false) {
     if (!this.recordingPath) {
       return false
     }
@@ -333,14 +334,25 @@ export default class VideoReporter extends WdioReporter {
     const frame = this.frameNr++
     const filePath = path.resolve(this.recordingPath, frame.toString().padStart(SCREENSHOT_PADDING_WITH, '0') + '.png')
 
-    this.screenshotPromises.push(
-      browser.saveScreenshot(filePath)
-        .then(() => this.#log(`- Screenshot (frame: ${frame})`))
-        .catch((error: Error) => {
-          fs.writeFileSync(filePath, notAvailableImage, 'base64')
-          this.#log(`Screenshot not available (frame: ${frame}). Error: ${error}..`)
-        })
-    )
+    if (immediateCapture) {
+      try {
+        await browser.saveScreenshot(filePath)
+        this.#log(`- Immediate Screenshot (frame: ${frame})`)
+      } catch (error) {
+        fs.writeFileSync(filePath, notAvailableImage, 'base64')
+        this.#log(`Immediate Screenshot not available (frame: ${frame}). Error: ${error}..`)
+      }
+
+    } else {
+      this.screenshotPromises.push(
+        browser.saveScreenshot(filePath)
+          .then(() => this.#log(`- Screenshot (frame: ${frame})`))
+          .catch((error: Error) => {
+            fs.writeFileSync(filePath, notAvailableImage, 'base64')
+            this.#log(`Screenshot not available (frame: ${frame}). Error: ${error}..`)
+          })
+      )
+    }
   }
 
   clearScreenshotInterval () {
@@ -410,16 +422,38 @@ export default class VideoReporter extends WdioReporter {
     const promise: Promise<void> = Promise
       .all(this.screenshotPromises)
       .then(() => frameCheckPromise)
-      .then(() => new Promise((resolve) => {
+      .then(() => new Promise((resolve, reject) => {
         const cp = spawn(command, args, {
           stdio: 'ignore',
           shell: true,
           windowsHide: true,
         })
         cp.on('close', () => {
-          this.#log(`Generated video: "${videoPath}" (${Date.now() - start}ms)`)
+          this.#log(`[ffmpeg] Generated video: "${videoPath}" (${Date.now() - start}ms)`)
           return resolve()
         })
+        cp.on('error', (e) => {
+          const errorMessage = `[ffmpeg] Video generation errored for "${videoPath}\n${e.message}`
+          this.#log(errorMessage)
+          return reject(errorMessage)
+        })
+        cp.on('message', (msg) => {
+          this.#log(`[ffmpeg] Video message for ${videoPath}: ${msg}`)
+        })
+        cp.on('disconnect', (e: Error) => {
+          const errorMessage = `[ffmpeg] Video generation disconnected for "${videoPath}\n${e.message}`
+          this.#log(errorMessage)
+          return reject(errorMessage)
+
+        })
+        cp.on('spawn', (msg: any) => {
+          this.#log(`[ffmpeg] ${videoPath} spawned ${msg}`)
+        })
+
+        cp.on('connection', (msg) => {
+          this.#log(`[ffmpeg] ${videoPath} connected ${msg}`)
+        })
+
       }))
 
     this.videoPromises.push(promise)

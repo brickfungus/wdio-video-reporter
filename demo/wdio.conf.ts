@@ -5,6 +5,7 @@ import allure from 'allure-commandline'
 import video from '../dist/wdio-video-reporter.mjs'
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url))
+const baseOutputDir = path.join(__dirname, '_results_')
 
 export const config: WebdriverIO.Config = {
   // Set up the browser window
@@ -16,17 +17,18 @@ export const config: WebdriverIO.Config = {
   // Custom settings
   // ===============
   logLevel: 'info', // trace | debug | info | warn | error | silent
-  outputDir: path.join(__dirname, '_results_'),
+  outputDir: baseOutputDir,
   reporters: [
     'spec',
     [video, {
       saveAllVideos: false,       // If true, also saves videos for successful test cases
       videoSlowdownMultiplier: 3, // Higher to get slower videos, lower for faster videos [Value 1-100]
-      videoRenderTimeout: 5000,      // milliseconds to wait for a video to finish rendering
-      videoFormat: 'webm'
+      videoRenderTimeout: 6000,      // milliseconds to wait for a video to finish rendering
+      videoFormat: 'webm',
+      intervalScreenshot: .5,
     }],
     ['allure', {
-      outputDir: path.join(__dirname, '_results_/allure-raw')
+      outputDir: path.join(baseOutputDir, 'allure-raw')
     }],
   ],
 
@@ -39,11 +41,11 @@ export const config: WebdriverIO.Config = {
       browserName: 'chrome',
       acceptInsecureCerts: true,
     },
-    {
-      maxInstances: 1,
-      browserName: 'firefox',
-      acceptInsecureCerts: true,
-    },
+    // {
+    //   browserName: 'firefox',
+    //   acceptInsecureCerts: true,
+    //   browserVersion: 'stable'
+    // },
   ],
 
   // ==================
