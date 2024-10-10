@@ -24,7 +24,8 @@ export const config: WebdriverIO.Config = {
       saveAllVideos: false,       // If true, also saves videos for successful test cases
       videoSlowdownMultiplier: 3, // Higher to get slower videos, lower for faster videos [Value 1-100]
       videoRenderTimeout: 15000,      // milliseconds to wait for a video to finish rendering
-      videoFormat: 'webm'
+      videoFormat: 'webm',
+      screenshotIntervalSecs: .5,
     }],
     ['allure', {
       outputDir: path.join(__dirname, '_results_/allure-raw')
@@ -43,7 +44,7 @@ export const config: WebdriverIO.Config = {
       'goog:chromeOptions': {
         args: [
           '--no-sandbox',
-          '--headless=new',
+          // '--headless=new',
           '--disable-gpu']
       },
     },

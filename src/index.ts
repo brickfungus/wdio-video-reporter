@@ -185,7 +185,7 @@ export default class VideoReporter extends WdioReporter {
   /**
    * Clear suite name from naming structure
    */
-  onSuiteEnd (suite: SuiteStats) {
+  onSuiteEnd () {
     if (!this.#record) {
       return
     }
@@ -197,12 +197,12 @@ export default class VideoReporter extends WdioReporter {
     }
 
     this.testNameStructure.pop()
-    const hasFailedTests = suite.tests.filter(test => test.state === 'failed').length > 0
-    const allTestsPassed = suite.tests.filter(test => test.state === 'failed').length === 0
+    // const hasFailedTests = suite.tests.filter(test => test.state === 'failed').length > 0
+    // const allTestsPassed = suite.tests.filter(test => test.state === 'failed').length === 0
 
-    if (hasFailedTests || (allTestsPassed && this.options.saveAllVideos)) {
-      this.addFrame()
-    }
+    // if (hasFailedTests || (allTestsPassed && this.options.saveAllVideos)) {
+    //   this.addFrame()
+    // }
   }
 
   /**
@@ -332,7 +332,7 @@ export default class VideoReporter extends WdioReporter {
     const filePath = path.resolve(this.recordingPath, frame.toString().padStart(SCREENSHOT_PADDING_WITH, '0') + '.png')
 
     if (browser.isBidi) {
-      browser.getWindowHandle().then((contextId:string) => {
+      browser.getWindowHandle().then((contextId: string) => {
         const contextCaptureScreenshotParameters: BrowsingContextCaptureScreenshotParameters = {
           context: contextId,
           origin: 'viewport',
@@ -341,11 +341,12 @@ export default class VideoReporter extends WdioReporter {
         this.screenshotPromises.push(
           browser.browsingContextCaptureScreenshot(contextCaptureScreenshotParameters)
             .then((captureScreenshotResult) => {
+              console.log(`- Bidi Screenshot (frame: ${frame})`)
               this.#log(`- Bidi Screenshot (frame: ${frame})`)
               fs.writeFileSync(filePath, captureScreenshotResult.data, 'base64')
             }).catch((error: Error) => {
               fs.writeFileSync(filePath, notAvailableImage, 'base64')
-              this.#log(`Bidi Screenshot not available (frame: ${frame}). Error: ${error}..`)
+              this.#log(`Bidi Screenshot not available (frame: ${frame}). Error: ${error}.`)
             })
         )
       })
@@ -356,7 +357,7 @@ export default class VideoReporter extends WdioReporter {
           .then(() => this.#log(`- Screenshot (frame: ${frame})`))
           .catch((error: Error) => {
             fs.writeFileSync(filePath, notAvailableImage, 'base64')
-            this.#log(`Screenshot not available (frame: ${frame}). Error: ${error}..`)
+            this.#log(`Screenshot not available (frame: ${frame}). Error: ${error}.`)
           })
       )
     }

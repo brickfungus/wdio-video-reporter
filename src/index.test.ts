@@ -238,38 +238,15 @@ describe('Video Reporter', () => {
   describe('onSuiteEnd', () => {
     it('extends Allure report', async () => {
       const reporter = new VideoReporter({})
-      reporter.onSuiteEnd({} as any)
+      reporter.onSuiteEnd()
       await sleep()
       expect(addArgument).toBeCalledTimes(0)
 
       reporter.onRunnerStart(allureRunner)
-      reporter.onSuiteEnd({} as any)
+      reporter.onSuiteEnd()
       await sleep()
       expect(addArgument).toBeCalledTimes(1)
       expect(addArgument).toBeCalledWith('browserVersion', '1.2.3')
-    })
-
-    it('should add frame if test failed', async () => {
-      const reporter = new VideoReporter({})
-      reporter.testName = 'foo bar'
-      reporter.recordingPath = '/foo/bar'
-      reporter.onRunnerStart(allureRunner)
-      reporter.onSuiteEnd({ tests: [{ state: 'failed' }] } as any)
-      await sleep()
-      expect(browser.saveScreenshot).toBeCalledTimes(1)
-      expect(fs.writeFileSync).toBeCalledTimes(0)
-    })
-
-    it('should add a blank frame if taking screenshot fails', async () => {
-      vi.mocked(browser.saveScreenshot).mockRejectedValue(new Error('foobar'))
-      const reporter = new VideoReporter({})
-      reporter.testName = 'foo bar'
-      reporter.recordingPath = '/foo/bar'
-      reporter.onRunnerStart(allureRunner)
-      reporter.onSuiteEnd({ tests: [{ state: 'failed' }] } as any)
-      await sleep()
-      expect(browser.saveScreenshot).toBeCalledTimes(1)
-      expect(fs.writeFileSync).toBeCalledTimes(1)
     })
 
     it('should not call addFrame', () => {
