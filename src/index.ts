@@ -220,7 +220,10 @@ export default class VideoReporter extends WdioReporter {
     if (this.options.screenshotIntervalSecs) {
       const instance = this
       this.intervalScreenshot = setInterval(
-        () => instance.addFrame(),
+        () => {
+          console.log('Adding interval frame')
+          instance.addFrame()
+        },
         this.options.screenshotIntervalSecs * 1000
       )
     }
@@ -327,6 +330,7 @@ export default class VideoReporter extends WdioReporter {
     if (!this.recordingPath) {
       return false
     }
+    const start = performance.now()
 
     const frame = this.frameNr++
     const filePath = path.resolve(this.recordingPath, frame.toString().padStart(SCREENSHOT_PADDING_WITH, '0') + '.png')
@@ -347,6 +351,9 @@ export default class VideoReporter extends WdioReporter {
             }).catch((error: Error) => {
               fs.writeFileSync(filePath, notAvailableImage, 'base64')
               this.#log(`Bidi Screenshot not available (frame: ${frame}). Error: ${error}.`)
+            }).finally(() => {
+              const endTime = performance.now()
+              this.#log(`addFrame took ${endTime - start} ms`)
             })
         )
       })
@@ -358,6 +365,9 @@ export default class VideoReporter extends WdioReporter {
           .catch((error: Error) => {
             fs.writeFileSync(filePath, notAvailableImage, 'base64')
             this.#log(`Screenshot not available (frame: ${frame}). Error: ${error}.`)
+          }).finally(() => {
+            const endTime = performance.now()
+            this.#log(`addFrame took ${endTime - start} ms`)
           })
       )
     }
