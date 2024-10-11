@@ -25,7 +25,7 @@ export const config: WebdriverIO.Config = {
       videoSlowdownMultiplier: 3, // Higher to get slower videos, lower for faster videos [Value 1-100]
       videoRenderTimeout: 15000,      // milliseconds to wait for a video to finish rendering
       videoFormat: 'webm',
-      screenshotIntervalSecs: .5,
+      screenshotIntervalSecs: .1,
     }],
     ['allure', {
       outputDir: path.join(__dirname, '_results_/allure-raw')

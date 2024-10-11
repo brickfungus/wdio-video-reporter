@@ -52,7 +52,7 @@ export default class VideoReporter extends WdioReporter {
     this.options = Object.assign({}, DEFAULT_OPTIONS, options) as Required<ReporterOptions>
 
     if (this.options.screenshotIntervalSecs) {
-      this.options.screenshotIntervalSecs = Math.max(this.options.screenshotIntervalSecs, 0.5)
+      this.options.screenshotIntervalSecs = Math.max(this.options.screenshotIntervalSecs, 0.1)
     }
   }
 
