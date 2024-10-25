@@ -23,9 +23,9 @@ export const config: WebdriverIO.Config = {
     [video, {
       saveAllVideos: false,       // If true, also saves videos for successful test cases
       videoSlowdownMultiplier: 3, // Higher to get slower videos, lower for faster videos [Value 1-100]
-      videoRenderTimeout: 15000,      // milliseconds to wait for a video to finish rendering
+      videoRenderTimeout: 60000,      // milliseconds to wait for a video to finish rendering
       videoFormat: 'webm',
-      screenshotIntervalSecs: .1,
+      // screenshotIntervalSecs: .5,
     }],
     ['allure', {
       outputDir: path.join(__dirname, '_results_/allure-raw')
@@ -35,8 +35,19 @@ export const config: WebdriverIO.Config = {
   // ============
   // Capabilities
   // ============
-  maxInstances: 1,
+  maxInstances: 2,
+  injectGlobals: true,
+  specFileRetries: 0,
   capabilities: [
+    // {
+    //   browserName: 'firefox',
+    //   acceptInsecureCerts: true,
+    //   'moz:firefoxOptions': {
+    //     args: [
+    //       // '--headless',
+    //       '--no-sandbox', '--disable-gpu']
+    //   }
+    // },
     {
       browserName: 'chrome',
       browserVersion: 'stable',
@@ -48,13 +59,7 @@ export const config: WebdriverIO.Config = {
           '--disable-gpu']
       },
     },
-    {
-      browserName: 'firefox',
-      acceptInsecureCerts: true,
-      'moz:firefoxOptions': {
-        args: ['-headless', '--no-sandbox', '--disable-gpu']
-      }
-    },
+
   ],
 
   // ==================

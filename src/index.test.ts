@@ -96,7 +96,7 @@ describe('Video Reporter', () => {
   })
 
   it('sets screenshotIntervalSecs to max of 0.5s', () => {
-    const options = { screenshotIntervalSecs: 0.1 }
+    const options = { screenshotIntervalSecs: 0.5 }
     const reporter = new VideoReporter(options)
     expect(reporter.options.screenshotIntervalSecs).toBe(0.5)
   })

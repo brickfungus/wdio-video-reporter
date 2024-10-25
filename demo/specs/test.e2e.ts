@@ -27,8 +27,26 @@ describe('User interactions', () => {
   })
 
   it('should pick from dropdown menu (fails by design to gen video)', async () => {
-    const inputLink = await $('a=Dropdown').getElement()
+    const inputLink = await $('a=Inputs').getElement()
     await inputLink.click()
+    await (await getHeader()).waitForDisplayed()
+
+    const inputField = await $('input').getElement()
+    await inputField.click()
+
+    await browser.keys('A')
+    await browser.pause(1000)
+    await browser.keys(['2', '3'])
+    await browser.pause(1000)
+    await browser.keys(['5', '4', '3', '2', '1'])
+    await browser.pause(1000)
+    await browser.back()
+    await browser.pause(1000)
+
+    await browser.refresh()
+
+    const dropDownLink = await $('a=Dropdown').getElement()
+    await dropDownLink.click()
     await (await getHeader()).waitForDisplayed()
 
     const dropDown = await $('select#dropdown').getElement()

@@ -46,7 +46,6 @@ export const DEFAULT_OPTIONS = {
   excludedActions: [],
 
   // Which commands should result in a screenshot (without `/session/:sessionId/`)
-  // https://github.com/SeleniumHQ/selenium/wiki/JsonWireProtocol
   snapshotCommands: [
     'url',
     'forward',
